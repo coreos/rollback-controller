@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: hello
+spec:
+  progressDeadlineSeconds: 5
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: hello
+    spec:
+      containers:
+      - name: hello
+        image: alpine:3.5
+        command:
+        - /bin/sh
+        - -c
+        - "while :; do echo 'Goodbye'; exit 1; sleep 1; done"
