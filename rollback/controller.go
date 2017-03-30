@@ -2,9 +2,9 @@ package rollback
 
 import (
 	"context"
+	"log"
 	"time"
 
-	"github.com/golang/glog"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/v1"
 	"k8s.io/client-go/pkg/apis/extensions/v1beta1"
@@ -23,7 +23,7 @@ func (c *Controller) Run(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-		case <-time.After(10 * time.Second):
+		case <-time.After(5 * time.Second):
 			c.rollbackDeployments()
 		}
 	}
@@ -32,22 +32,22 @@ func (c *Controller) Run(ctx context.Context) {
 // rollbackDeployments identifies deployments that have failed to make
 // progress and rolls them back to the last revision.
 func (c *Controller) rollbackDeployments() {
-	client := c.Client.ExtensionsV1beta1().Deployments(c.Namespace)
+	client := c.Client.ExtensionsV1beta1()
 
-	list, err := client.List(v1.ListOptions{})
+	list, err := client.Deployments(c.Namespace).List(v1.ListOptions{})
 	if err != nil {
-		glog.Infof("failed to list deployments: %v", err)
+		log.Printf("failed to list deployments: %v", err)
 		return
 	}
-	glog.Infof("found %d deployments", len(list.Items))
+	log.Printf("found %d deployments", len(list.Items))
 
 	for _, d := range list.Items {
 		if deploymentFailed(d) && d.Spec.RollbackTo == nil {
 			d.Spec.RollbackTo = &v1beta1.RollbackConfig{Revision: 0}
-			if _, err := client.Update(&d); err != nil {
-				glog.Infof("failed to update deployment %s/%s", d.Name, d.Namespace)
+			if _, err := client.Deployments(d.Namespace).Update(&d); err != nil {
+				log.Printf("failed to update deployment %s/%s: %v", d.Name, d.Namespace, err)
 			} else {
-				glog.Infof("rolled back deployment %s/%s", d.Name, d.Namespace)
+				log.Printf("rolled back deployment %s/%s", d.Name, d.Namespace)
 			}
 		}
 	}

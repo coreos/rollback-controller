@@ -4,8 +4,7 @@ build: bin/rollback-controller
 .PHONY: FORCE
 
 bin/%: FORCE
-	@go build -i ./cmd/$*
-	@go build -o ./bin/$* ./cmd/$*
+	@go build -i -o ./bin/$* ./cmd/$*
 
 .PHONY: vendor
 vendor:

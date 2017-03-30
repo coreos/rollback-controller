@@ -60,7 +60,8 @@ func newInClusterClient() (*kubernetes.Clientset, error) {
 
 func newClient(kubeconfigPath string) (*kubernetes.Clientset, error) {
 	loadingRules := &clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeconfigPath}
-	config, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, nil).ClientConfig()
+	overrides := &clientcmd.ConfigOverrides{}
+	config, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, overrides).ClientConfig()
 	if err != nil {
 		return nil, fmt.Errorf("loading kubeconfig: %v", err)
 	}
