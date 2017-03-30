@@ -30,7 +30,7 @@ spec:
 
 doesn't roll back in v1.5.
 
-The `kube-rollback-controller` loops, looking for failed deployments, then automatically does this rollback.
+The `rollback-controller` loops, looking for failed deployments, then automatically does this rollback.
 
 ## Example
 
